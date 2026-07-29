@@ -1,5 +1,4 @@
 /node_modules
-/contracts/managed
 /contracts/hello-world.compact
 /logs
 deployment.json

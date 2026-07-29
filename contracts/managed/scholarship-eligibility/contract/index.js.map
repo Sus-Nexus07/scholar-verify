@@ -1,0 +1,8 @@
+{
+  "version": 3,
+  "file": "index.js",
+  "sourceRoot": "../../../../",
+  "sources": ["contracts/scholarship-eligibility.compact"],
+  "names": [],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EAAA;;;;;;;;;;;;;MAQA,AAAA,gBAKC;;;;;cAL+B,WAAmB;cAAE,SAAkB;;;;;;;;;;;;;;;;;;;;;;;;;yCAAvC,WAAmB,+BAAE,SAAkB;;;;;;;;;kDAAvC,WAAmB;kDAAE,SAAkB;;;OAKtE;;;;;;GAAC;EAbF;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;IAGA;;;;;;;;;yEAAgC;IAChC;;;;;;;;;yEAAmC;;;;;;;GASjC;EAPF,AAAA,YAA8B;;0DAA9B,SAA8B;;;;;;;;;;;;;;GAAA;EAE9B,AAAA,mBAKC,4BAL+B,WAAmB,EAAE,SAAkB;UAC7D,QAAoB;UACpB,WAA+B,GAAnB,QAAM,IAAI,WAAS;IACrC;;;;;;;2HAAoB,WAAS;;yEAArB;IACR;;;;;;;2HAAqB,SAAO;;yEAAnB;;GACZ;;;;;;;;;;;;;;;;IAVD;qCAAA;;;;;;;;;;;0GAAgC;KAAA;IAChC;qCAAA;;;;;;;;;;;0GAAmC;KAAA;;;;;;;;;;"
+}
