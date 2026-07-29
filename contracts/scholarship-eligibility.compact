@@ -1,0 +1,14 @@
+pragma language_version 0.23.0;
+import CompactStandardLibrary;
+
+export ledger eligible: Boolean;
+export ledger programId: Bytes<32>;
+
+witness getIncome(): Uint<32>;
+
+export circuit checkEligibility(threshold: Uint<32>, program: Bytes<32>): [] {
+    const income = getIncome();
+    const qualifies = income <= threshold;
+    eligible = disclose(qualifies);
+    programId = disclose(program);
+}
