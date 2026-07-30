@@ -1,137 +1,70 @@
-# Hello World Example
+# ScholarVerify
 
-The repository is intended as part of the tutorial flow for the hello-world example in the [Midnight documentation](https://docs.midnight.network/getting-started/hello-world). It does not operate as a complete repository without the accompanying documentation.
+> Prove scholarship eligibility without revealing your income -> zero-knowledge threshold verification on Midnight.
 
-The below documentation will be provided here to "finish" this example.
+## Contract Address
 
-## Set up project
+| Network | Address |
+|---------|---------|
+| Preview | `b31933a86c47b9754714a5ebf0deee4111a3f121766183c8223183f27dc5495d` |
+
+## What This Does
+
+ScholarVerify is a privacy-preserving eligibility checker built on Midnight. An applicant's income never leaves their own machine - instead, a zero-knowledge circuit proves whether their income meets a scholarship program's threshold, and only that yes/no result is written to the public ledger.
+
+This solves a real problem: scholarship and grant programs typically require applicants to disclose sensitive financial data to prove eligibility, creating privacy risk and discouraging honest applications. ScholarVerify lets a program verify eligibility with mathematical certainty, without ever seeing the applicant's actual income.
+
+## Privacy Model
+
+- **PUBLIC** (on-chain, visible to anyone): whether the applicant is `eligible` (true/false), and the `programId` they applied under.
+- **PRIVATE** (private witness, never on-chain): the applicant's actual income figure.
+- **What the user PROVES without revealing:** that their income is less than or equal to the program's threshold - without ever disclosing the specific number.
+
+## Tech Stack
+
+- Midnight network, Compact language, Node.js v22, Docker, Yarn, Vitest
+
+## Prerequisites
+
+- Node.js v22 (use `nvm install 22 && nvm use 22`)
+- Docker + Docker Compose
+- Yarn (via Corepack: `corepack enable && corepack prepare yarn@1.22.22 --activate`)
+- Compact compiler ([install instructions](https://docs.midnight.network/getting-started/installation))
+
+## Setup
 
 ```bash
-git clone git@github.com:midnightntwrk/example-hello-world.git
-```
-
-Install dependencies:
-
-```bash
+git clone https://github.com/Sus-Nexus07/scholar-verify.git
+cd scholar-verify
+nvm use
 yarn install
+compact compile contracts/scholarship-eligibility.compact contracts/managed/scholarship-eligibility
 ```
 
-## Create the contract file
+## Run Tests
 
-Create a new file named `hello-world.compact` in the `contracts` directory:
-
-```bash
-touch contracts/hello-world.compact
-```
-
-Open this file in VS Code:
-```bash
-code .
-```
-
-## Create the Compact Smart Contract
-
-```compact
-pragma language_version 0.23;
-
-export ledger message: Opaque<"string">;
-
-export circuit storeMessage(newMessage: Opaque<"string">): [] {
-  message = disclose(newMessage);
-}
-```
-- `pragma language_version` specifies which version of Compact your contract uses.
-- `ledger message` creates a state variable named `message` that stores a string value in the on-chain state. On-chain state is public and persistent on the blockchain.
-- `circuit storeMessage` is a Compact circuit (function) that defines the logic to modify on-chain state.
-- `newMessage: Opaque<"string">` is the input parameter. *Circuit parameters are always private by default.* The `disclose()` function marks the private value as safe to store publicly. Without it, trying to assign `newMessage` directly to the ledger returns a compiler error.
-
-## Compile the contract
-
-Compiling transforms your Compact code into zero-knowledge circuits, generates cryptographic keys, 
-and creates TypeScript APIs and a JavaScript implementation for the contract to be used by DApps. 
-
-Run the compiler from the contracts folder:
-
-```bash
-compact compile hello-world.compact managed/hello-world
-```
-
-You should see the following output:
-
-```
-Compiling 1 circuits:
-  circuit "storeMessage" (k=6, rows=26)
-```
-
-The compilation process will:
-1. Parse and validate your Compact code.
-2. Generate zero-knowledge circuits from your logic.
-3. Create proving and verifying keys for the circuits.
-4. Generate the TypeScript API and JavaScript implementation for the contract.
-
-When compilation completes, you'll see a new directory structure:
-
-```
-contracts/
-├── managed/
-|   └── hello-world/
-|        ├── compiler/
-|        ├── contract/
-|        ├── keys/
-|        └── zkir/
-└── hello-world.compact
-└── index.ts
-```
-
-Here's what each directory contains:
-
-- **contract/**: The compiled contract artifacts, which includes the JavaScript implementation and type definitions.
-- **keys/**: Cryptographic proving and verifying keys that enable zero-knowledge proofs.
-- **zkir/**: Zero-Knowledge Intermediate Representation—the bridge between Compact and the ZK backend.
-- **compiler/**: Compiler-generated JSON output that other tools can use to understand the contract structure.
-
-## Deploy Contract to Local Devnet
-Now that your contract is compiled, it needs to be deployed to the blockchain so that you can interact with it.
-
-Be sure the Docker engine is running and in a *separate terminal* start the proof server from the project root:
+Local devnet:
 ```bash
 yarn env:up
-```
-
-Leave the proof server running for the following steps.
-
-To deploy the contract, you'll need a wallet. The local devnet package comes with 3 pre-funded wallets.
-
-
-Run the deployment script:
-```bash
 yarn test:local
-```
-
-The test script will begin to show output from your local devnet and will progress the contract deployment and interaction programatically:
-
-```
-[12:46:12.694] INFO (22064): Wallet sync complete after 23 emissions
-[12:46:12.703] INFO (22064): Providers initialized. Ready to test
-[12:46:12.707] INFO (22064): Creating private state...
-[12:46:32.347] INFO (22064): Setting the contract address...
-[12:46:32.347] INFO (22064): Contract deployed at: bba6579743ae23b44301d4a9f8df30dbd5244d63a59d8fbc2c9fc7ea521a04f8
- ✓ src/test/hw.test.ts (2 tests) 39112ms
-   ✓ Hello World Contract > Deploys the contract  19649ms
-   ✓ Hello World Contract > Stores Hello World!   18184ms
-```
-
-Stop the Docker container:
-```bash
 yarn env:down
 ```
 
-Hello World! You are now ready to explore [Tutorials](https://docs.midnight.network/category/tutorials) for more detailed instructions on building DApps on Midnight!
+Preview network (requires a funded wallet -> see `.env.preview.example`):
+```bash
+yarn proof:up
+yarn test:preview
+yarn proof:down
+```
 
-## Deploy Contract to Live Testnet
+## Initial Idea
 
-To run this test script on Preview or Preprod:
-1. Generate a wallet on the given network and fund it manually via the network's faucet page — [Preview](https://midnight-tmnight-preview.nethermind.dev/) or [Preprod](https://midnight-tmnight-preprod.nethermind.dev/). The faucet is a human-facing web page (no programmatic drip endpoint), so the test suite assumes the seed you supply is already funded with tNIGHT. tDUST can be delegated in 1AM or Lace Carbon (coming soon). See [Environments and endpoints](https://docs.midnight.network/relnotes/network) for reference.
-1. Create `.env.<network>` and populate it based on the information in `.env.<network>.example` in this repository.
-1. Start the proof server: `yarn proof:up`
-1. Start the test: `yarn test:<network>` -- the wallet will sync to the network and advance the test suite programmatically.
+*Scholarship and grant programs require applicants to prove they meet eligibility criteria such as income thresholds, academic performance, or prior grant history. Today, that means exposing sensitive financial and academic data to reviewers who may mishandle or leak it, and it discourages honest applicants who don't want their real numbers on record. ScholarVerify solves this with a zero-knowledge circuit: applicants prove they meet a program's threshold without revealing the underlying figure, so reviewers get a verifiable yes/no answer instead of raw personal data. Starting with income-based scholarship eligibility, the long-term vision extends this same privacy-preserving verification model to academic credentials and course completion - letting institutions confirm what someone has achieved without exposing their full record*
+
+## Screenshots
+
+**Successful compile output:**
+![Compile output](docs/screenshots/compile-output.png)
+
+**Contract deployed on Preview:**
+![Deploy output](docs/screenshots/deploy-output.png)
