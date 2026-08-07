@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
 import type { WalletConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
-import { CompiledScholarshipContract } from '../contracts/index';
+import { CompiledScholarshipContractBrowser } from './browserContract';
 import { buildBrowserProviders, buildProofProvider } from './browserProviders';
 
 interface CircuitCallProps {
@@ -36,7 +36,7 @@ const CircuitCall: React.FC<CircuitCallProps> = ({ walletAPI, contractAddress })
       const providers = { ...browserProviders, proofProvider };
 
       const foundContract = await findDeployedContract(providers as any, {
-        compiledContract: CompiledScholarshipContract,
+        compiledContract: CompiledScholarshipContractBrowser,
         contractAddress,
         privateStateId: PRIVATE_STATE_ID,
       });
