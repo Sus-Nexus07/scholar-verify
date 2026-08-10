@@ -4,6 +4,7 @@ import type { WalletConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
 import { CompiledScholarshipContractBrowser } from './browserContract';
 import { buildBrowserProviders, buildProofProvider } from './browserProviders';
 import { buildWalletProviderAdapter } from './walletProviderAdapter';
+import { setNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 
 interface CircuitCallProps {
   walletAPI: WalletConnectedAPI;
@@ -25,6 +26,7 @@ const CircuitCall: React.FC<CircuitCallProps> = ({ walletAPI, contractAddress })
     setResult(null);
 
     try {
+      setNetworkId('preview'); // TEMP: matches our temporary Preview testing setup
       const incomeValue = BigInt(income);
       const programId = new Uint8Array(32).fill(1);
 
