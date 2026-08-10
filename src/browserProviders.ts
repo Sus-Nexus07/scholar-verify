@@ -9,10 +9,19 @@ const zkConfigBaseUrl = new URL('/contract/collection', window.location.origin).
 export const zkConfigProvider = new FetchZkConfigProvider(zkConfigBaseUrl, window.fetch.bind(window));
 
 export async function buildProofProvider(walletAPI: WalletConnectedAPI) {
-  // Lace does not yet implement getProvingProvider() (delegated proving) as of mid-2026,
-  // so we fall back to httpClientProofProvider using Lace's own configured proof server URL.
+  // Lace's getProvingProvider() may exist but not return a fully functional
+  // ProofProvider (confirmed gap as of mid-2026) — validate the actual shape
+  // rather than trusting typeof alone, and fall back to the HTTP proof
+  // server (Lace's own configured one) if it doesn't check out.
   if (typeof (walletAPI as any).getProvingProvider === 'function') {
-    return await (walletAPI as any).getProvingProvider(zkConfigProvider);
+    try {
+      const delegated = await (walletAPI as any).getProvingProvider(zkConfigProvider);
+      if (delegated && typeof delegated.proveTx === 'function') {
+        return delegated;
+      }
+    } catch {
+      // fall through to HTTP proof server
+    }
   }
   const config = await walletAPI.getConfiguration();
   const proverServerUri = (config as any).proverServerUri || 'http://localhost:6300';
