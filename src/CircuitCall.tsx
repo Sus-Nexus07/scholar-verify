@@ -3,6 +3,7 @@ import { findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
 import type { WalletConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
 import { CompiledScholarshipContractBrowser } from './browserContract';
 import { buildBrowserProviders, buildProofProvider } from './browserProviders';
+import { buildWalletProviderAdapter } from './walletProviderAdapter';
 
 interface CircuitCallProps {
   walletAPI: WalletConnectedAPI;
@@ -27,7 +28,13 @@ const CircuitCall: React.FC<CircuitCallProps> = ({ walletAPI, contractAddress })
       const incomeValue = BigInt(income);
       const programId = new Uint8Array(32).fill(1);
 
-      const browserProviders = buildBrowserProviders(walletAPI);
+      const { walletProvider, midnightProvider } = await buildWalletProviderAdapter(walletAPI);
+      const baseProviders = buildBrowserProviders(walletAPI);
+      const browserProviders = {
+        ...baseProviders,
+        walletProvider,
+        midnightProvider,
+      };
       const proofProvider = await buildProofProvider(walletAPI);
 
       browserProviders.privateStateProvider.setContractAddress(contractAddress);
