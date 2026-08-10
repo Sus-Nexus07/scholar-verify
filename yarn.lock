@@ -373,7 +373,7 @@
     "@types/object-inspect" "^1.8.1"
     object-inspect "^1.12.3"
 
-"@midnight-ntwrk/dapp-connector-api@4.0.1":
+"@midnight-ntwrk/dapp-connector-api@4.0.1", "@midnight-ntwrk/dapp-connector-api@^4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@midnight-ntwrk/dapp-connector-api/-/dapp-connector-api-4.0.1.tgz#4f3a240704d9993e59b93eba6f2f16c047cf4542"
   integrity sha512-IstRo8xfmlJlGgUcAJeRzPUmGCp0/xZR3/bfTOk33MHrzbGmB79r/zYziGavcclo1pkkoBHAodX4vz3xgFxczw==
@@ -399,6 +399,15 @@
     "@midnight-ntwrk/midnight-js-protocol" "4.1.1"
     "@midnight-ntwrk/midnight-js-types" "4.1.1"
     "@midnight-ntwrk/midnight-js-utils" "4.1.1"
+
+"@midnight-ntwrk/midnight-js-fetch-zk-config-provider@4.1.1":
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@midnight-ntwrk/midnight-js-fetch-zk-config-provider/-/midnight-js-fetch-zk-config-provider-4.1.1.tgz#e76429d77a459a05bfbd50ed3db3423f8374670c"
+  integrity sha512-d9vPAXjCvbe3KdPDBwp8Cp4HXwdo9jfCjeyJjJPfIDHCctXrIQ7btu+CqY1+bgV05FHVMOBLjJ9TS2tc2xdwrw==
+  dependencies:
+    "@midnight-ntwrk/midnight-js-types" "4.1.1"
+    "@midnight-ntwrk/midnight-js-utils" "4.1.1"
+    cross-fetch "^4.1.0"
 
 "@midnight-ntwrk/midnight-js-http-client-proof-provider@4.1.1":
   version "4.1.1"
