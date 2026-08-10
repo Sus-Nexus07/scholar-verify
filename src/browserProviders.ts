@@ -1,6 +1,8 @@
 import { FetchZkConfigProvider } from '@midnight-ntwrk/midnight-js-fetch-zk-config-provider';
 import { httpClientProofProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
+import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
 import type { WalletConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
+import { PREVIEW_CONFIG } from './config';
 
 const zkConfigBaseUrl = new URL('/contract/collection', window.location.origin).toString();
 
@@ -20,6 +22,7 @@ export async function buildProofProvider(walletAPI: WalletConnectedAPI) {
 export function createPrivateStateProvider() {
   let contractAddressScope = '';
   const stateStore = new Map<string, unknown>();
+  const signingKeyStore = new Map<string, unknown>();
 
   return {
     setContractAddress(address: string) {
@@ -37,11 +40,32 @@ export function createPrivateStateProvider() {
     async clear() {
       stateStore.clear();
     },
+    async setSigningKey(address: string, signingKey: unknown) {
+      signingKeyStore.set(address, signingKey);
+    },
+    async getSigningKey(address: string) {
+      return signingKeyStore.get(address) ?? null;
+    },
+    async removeSigningKey(address: string) {
+      signingKeyStore.delete(address);
+    },
+    async clearSigningKeys() {
+      signingKeyStore.clear();
+    },
+    async exportPrivateStates(): Promise<never> {
+      throw new Error('exportPrivateStates is not supported in the browser demo provider.');
+    },
+    async importPrivateStates(): Promise<never> {
+      throw new Error('importPrivateStates is not supported in the browser demo provider.');
+    },
+    async exportSigningKeys(): Promise<never> {
+      throw new Error('exportSigningKeys is not supported in the browser demo provider.');
+    },
+    async importSigningKeys(): Promise<never> {
+      throw new Error('importSigningKeys is not supported in the browser demo provider.');
+    },
   };
 }
-
-import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
-import { PREPROD_CONFIG } from './config';
 
 export function buildBrowserProviders(walletAPI: WalletConnectedAPI) {
   const privateStateProvider = createPrivateStateProvider();
@@ -49,8 +73,8 @@ export function buildBrowserProviders(walletAPI: WalletConnectedAPI) {
   return {
     privateStateProvider,
     publicDataProvider: indexerPublicDataProvider(
-      PREPROD_CONFIG.indexer,
-      PREPROD_CONFIG.indexerWS,
+      PREVIEW_CONFIG.indexer,
+      PREVIEW_CONFIG.indexerWS,
     ),
     zkConfigProvider,
     walletProvider: walletAPI,
