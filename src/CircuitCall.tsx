@@ -62,12 +62,29 @@ const CircuitCall: React.FC<CircuitCallProps> = ({ walletAPI, contractAddress })
       // remain visible or re-displayed once the proof has been generated.
       setIncome('');
     } catch (err) {
-      console.error('Circuit call error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to call circuit');
-    } finally {
-      setLoading(false);
+  console.error('=== FULL ERROR DUMP ===');
+  let current: any = err;
+  let depth = 0;
+  while (current && depth < 6) {
+    console.error(`--- Level ${depth} ---`);
+    console.error('toString:', String(current));
+    console.error('own properties:', Object.getOwnPropertyNames(current));
+    for (const key of Object.getOwnPropertyNames(current)) {
+      try {
+        console.error(`  ${key}:`, current[key]);
+      } catch {
+        console.error(`  ${key}: <unreadable>`);
+      }
     }
-  };
+    current = current.cause;
+    depth++;
+  }
+  console.error('=== END DUMP ===');
+    setError(err instanceof Error ? err.message : 'Failed to call circuit');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div>
