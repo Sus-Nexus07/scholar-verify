@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
+import { createUnprovenCallTx } from '@midnight-ntwrk/midnight-js-contracts';
 import type { WalletConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
+import { toHex } from '@midnight-ntwrk/midnight-js-utils';
 import { CompiledScholarshipContractBrowser } from './browserContract';
 import { buildBrowserProviders, buildProofProvider } from './browserProviders';
 import { buildWalletProviderAdapter } from './walletProviderAdapter';
@@ -26,65 +27,63 @@ const CircuitCall: React.FC<CircuitCallProps> = ({ walletAPI, contractAddress })
     setResult(null);
 
     try {
-      setNetworkId('preview'); // TEMP: matches our temporary Preview testing setup
+      setNetworkId('preview'); // TEMP: swap to 'preprod' before submission
       const incomeValue = BigInt(income);
       const programId = new Uint8Array(32).fill(1);
 
-      const { walletProvider, midnightProvider } = await buildWalletProviderAdapter(walletAPI);
+      const { walletProvider } = await buildWalletProviderAdapter(walletAPI);
       const baseProviders = buildBrowserProviders(walletAPI);
-      const browserProviders = {
-        ...baseProviders,
-        walletProvider,
-        midnightProvider,
-      };
       const proofProvider = await buildProofProvider(walletAPI);
 
-      browserProviders.privateStateProvider.setContractAddress(contractAddress);
-      await browserProviders.privateStateProvider.set(PRIVATE_STATE_ID, { income: incomeValue });
+      baseProviders.privateStateProvider.setContractAddress(contractAddress);
+      await baseProviders.privateStateProvider.set(PRIVATE_STATE_ID, { income: incomeValue });
 
-      const providers = { ...browserProviders, proofProvider };
+      const providers = { ...baseProviders, walletProvider };
 
-      const foundContract = await findDeployedContract(providers as any, {
+      // Step 1: build the unproven call transaction (does not touch the wallet's
+      // balancing/signing machinery at all).
+      const unsubmitted = await createUnprovenCallTx(providers as any, {
         compiledContract: CompiledScholarshipContractBrowser,
+        circuitId: 'checkEligibility',
         contractAddress,
+        args: [BigInt(threshold), programId],
         privateStateId: PRIVATE_STATE_ID,
-      });
+      } as any);
 
-      await foundContract.callTx.checkEligibility(BigInt(threshold), programId);
+      // Step 2: prove it ourselves via the proof server.
+      const unprovenTx = unsubmitted.private.unprovenTx;
+      const provenTx = await proofProvider.proveTx(unprovenTx);
 
-      // The circuit's result lives on-chain in ledger state, not in the call
-      // return value directly — re-query the public ledger to read it.
-      const state = await browserProviders.publicDataProvider.queryContractState(contractAddress);
+      // Step 3: hand the proven-but-unbalanced transaction to Lace as hex —
+      // Lace balances, signs, and binds it. We never deserialize the result
+      // ourselves, avoiding any guessed low-level type markers.
+      const hexTx = toHex(provenTx.serialize());
+      const balanced = await walletAPI.balanceUnsealedTransaction(hexTx, { payFees: true });
+
+      // Step 4: submit the balanced hex directly.
+      await walletAPI.submitTransaction(balanced.tx);
+
+      // Step 5: re-query ledger state for the result.
+      const state = await baseProviders.publicDataProvider.queryContractState(contractAddress);
       const ledgerState = state as any;
       setResult(ledgerState?.data?.eligible ?? null);
 
-      // Clear the income input immediately after submission — it must never
-      // remain visible or re-displayed once the proof has been generated.
       setIncome('');
     } catch (err) {
-  console.error('=== FULL ERROR DUMP ===');
-  let current: any = err;
-  let depth = 0;
-  while (current && depth < 6) {
-    console.error(`--- Level ${depth} ---`);
-    console.error('toString:', String(current));
-    console.error('own properties:', Object.getOwnPropertyNames(current));
-    for (const key of Object.getOwnPropertyNames(current)) {
-      try {
-        console.error(`  ${key}:`, current[key]);
-      } catch {
-        console.error(`  ${key}: <unreadable>`);
+      console.error('=== FULL ERROR DUMP ===');
+      let current: any = err;
+      let depth = 0;
+      while (current && depth < 6) {
+        console.error(`--- Level ${depth} ---`, String(current));
+        console.error('own properties:', Object.getOwnPropertyNames(current));
+        current = current.cause;
+        depth++;
       }
+      setError(err instanceof Error ? err.message : 'Failed to call circuit');
+    } finally {
+      setLoading(false);
     }
-    current = current.cause;
-    depth++;
-  }
-  console.error('=== END DUMP ===');
-    setError(err instanceof Error ? err.message : 'Failed to call circuit');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div>
