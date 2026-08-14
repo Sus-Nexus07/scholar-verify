@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import WalletCard from './WalletCard';
 import CircuitCall from './CircuitCall';
+import DeployContract from './DeployContract';
 import '@midnight-ntwrk/dapp-connector-api';
 import { selectWallet } from './selectWallet';
 
-const CONTRACT_ADDRESS = 'PASTE_PREPROD_ADDRESS_HERE';
+
+const CONTRACT_ADDRESS = 'PASTE_PREPROD_ADDRESS_HERE'; // TODO: replace once Preprod deploy succeeds
 
 const App: React.FC = () => {
   const [isConnected, setIsConnected] = useState<boolean>(false);
@@ -60,6 +62,7 @@ const App: React.FC = () => {
           onDisconnect={handleDisconnect}
         />
         {error && <p style={{ color: 'red' }}>{error}</p>}
+        {isConnected && walletAPI && <DeployContract walletAPI={walletAPI} />}
         {isConnected && walletAPI && (
           <CircuitCall walletAPI={walletAPI} contractAddress={CONTRACT_ADDRESS} />
         )}
