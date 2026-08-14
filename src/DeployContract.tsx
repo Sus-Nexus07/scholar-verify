@@ -47,19 +47,30 @@ const DeployContract: React.FC<DeployContractProps> = ({ walletAPI }) => {
       const address = (unsubmitted as any).public?.contractAddress ?? '(check Lace Activity for tx details)';
       setDeployedAddress(address);
     } catch (err) {
-      console.error('Deploy error:', err);
-      let current: any = err;
-      let depth = 0;
-      while (current && depth < 6) {
-        console.error(`--- Level ${depth} ---`, String(current));
-        current = current.cause;
-        depth++;
+  console.error('=== DEPLOY ERROR DUMP ===');
+  let current: any = err;
+  let depth = 0;
+  while (current && depth < 6) {
+    const props: Record<string, string> = {};
+    if (current && typeof current === 'object') {
+      for (const key of Object.getOwnPropertyNames(current)) {
+        try {
+          const val = current[key];
+          props[key] = typeof val === 'object' ? JSON.stringify(val, null, 2) : String(val);
+        } catch {
+          props[key] = '<unreadable>';
+        }
       }
-      setError(err instanceof Error ? err.message : 'Failed to deploy contract');
-    } finally {
-      setLoading(false);
     }
-  };
+    console.error(`LEVEL ${depth}: ${String(current)}\nPROPS: ${JSON.stringify(props, null, 2)}`);
+    current = current?.cause;
+    depth++;
+  }
+  setError(err instanceof Error ? err.message : 'Failed to deploy contract');
+} finally {
+  setLoading(false);
+}
+};
 
   return (
     <div style={{ border: '1px solid #444', padding: '1rem', marginTop: '1rem' }}>
