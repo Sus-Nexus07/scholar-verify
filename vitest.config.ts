@@ -1,23 +1,19 @@
-import { defineConfig } from 'vitest/config';
-import { loadEnv } from 'vite';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
-const network = process.env['MIDNIGHT_NETWORK'] ?? 'local';
-const isRemote = network !== 'local';
-
-// For remote networks, source secrets (e.g. MIDNIGHT_PREVIEW_SEED) from
-// .env.<network> so they don't need to be passed on the command line.
-// Shell env still wins over file values.
-const envFromFile = isRemote ? loadEnv(network, process.cwd(), '') : {};
-
+// https://vite.dev/config/
 export default defineConfig({
-  test: {
-    environment: 'node',
-    globals: true,
-    testTimeout: 10 * 60_000,
-    hookTimeout: isRemote ? 90 * 60_000 : 15 * 60_000,
-    env: envFromFile,
-    include: ['src/**/*.test.ts'],
-    reporters: ['default'],
-    sequence: { concurrent: false },
+  plugins: [react()],
+  optimizeDeps: {
+    exclude: [
+      '@midnight-ntwrk/ledger-v8',
+      '@midnight-ntwrk/onchain-runtime-v3',
+      '@midnight-ntwrk/zkir-v2',
+    ],
   },
-});
+  server: {
+    watch: {
+      ignored: ['**/midnight-level-db/**', '**/logs/**'],
+    },
+  },
+})

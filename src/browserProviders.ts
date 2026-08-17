@@ -2,7 +2,7 @@ import { FetchZkConfigProvider } from '@midnight-ntwrk/midnight-js-fetch-zk-conf
 import { httpClientProofProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
 import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
 import type { WalletConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
-import { PREVIEW_CONFIG } from './config';
+import { PREPROD_CONFIG } from './config';
 
 const zkConfigBaseUrl = new URL('/contract/collection', window.location.origin).toString();
 
@@ -82,8 +82,8 @@ export function buildBrowserProviders(walletAPI: WalletConnectedAPI) {
   return {
     privateStateProvider,
     publicDataProvider: indexerPublicDataProvider(
-      PREVIEW_CONFIG.indexer,
-      PREVIEW_CONFIG.indexerWS,
+      PREPROD_CONFIG.indexer,
+      PREPROD_CONFIG.indexerWS,
     ),
     zkConfigProvider,
     walletProvider: walletAPI,

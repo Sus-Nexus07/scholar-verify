@@ -27,7 +27,7 @@ const CircuitCall: React.FC<CircuitCallProps> = ({ walletAPI, contractAddress })
     setResult(null);
 
     try {
-      setNetworkId('preview'); // TEMP: swap to 'preprod' before submission
+      setNetworkId('preprod'); // TEMP: swap to 'preprod' before submission
       const incomeValue = BigInt(income);
       const programId = new Uint8Array(32).fill(1);
 
