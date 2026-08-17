@@ -6,8 +6,7 @@ import '@midnight-ntwrk/dapp-connector-api';
 import { selectWallet } from './selectWallet';
 
 
-const CONTRACT_ADDRESS = 'PASTE_PREPROD_ADDRESS_HERE'; // TODO: replace once Preprod deploy succeeds
-
+const CONTRACT_ADDRESS = '3182851944c8320e06fda1551cf5d9de0e4f2dd3e462bdf215207d5f216dd486';
 const App: React.FC = () => {
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
