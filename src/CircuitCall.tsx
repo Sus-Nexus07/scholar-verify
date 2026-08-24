@@ -1,3 +1,4 @@
+import { ledger } from './browserContract';
 import React, { useState } from 'react';
 import { createUnprovenCallTx } from '@midnight-ntwrk/midnight-js-contracts';
 import type { WalletConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
@@ -40,8 +41,11 @@ const CircuitCall: React.FC<CircuitCallProps> = ({ walletAPI, contractAddress })
 
       const providers = { ...baseProviders, walletProvider };
 
-      // Step 1: build the unproven call transaction (does not touch the wallet's
-      // balancing/signing machinery at all).
+     // Capture the state BEFORE submitting, so we can detect once the
+      // indexer has actually caught up with our new transaction.
+      const stateBefore = await baseProviders.publicDataProvider.queryContractState(contractAddress);
+      const eligibleBefore = ledger((stateBefore as any).data).eligible;
+
       const unsubmitted = await createUnprovenCallTx(providers as any, {
         compiledContract: CompiledScholarshipContractBrowser,
         circuitId: 'checkEligibility',
@@ -50,23 +54,25 @@ const CircuitCall: React.FC<CircuitCallProps> = ({ walletAPI, contractAddress })
         privateStateId: PRIVATE_STATE_ID,
       } as any);
 
-      // Step 2: prove it ourselves via the proof server.
       const unprovenTx = unsubmitted.private.unprovenTx;
       const provenTx = await proofProvider.proveTx(unprovenTx);
 
-      // Step 3: hand the proven-but-unbalanced transaction to Lace as hex —
-      // Lace balances, signs, and binds it. We never deserialize the result
-      // ourselves, avoiding any guessed low-level type markers.
       const hexTx = toHex(provenTx.serialize());
       const balanced = await walletAPI.balanceUnsealedTransaction(hexTx, { payFees: true });
-
-      // Step 4: submit the balanced hex directly.
       await walletAPI.submitTransaction(balanced.tx);
 
-      // Step 5: re-query ledger state for the result.
-      const state = await baseProviders.publicDataProvider.queryContractState(contractAddress);
-      const ledgerState = state as any;
-      setResult(ledgerState?.data?.eligible ?? null);
+      // Poll until the indexer reflects our new state, rather than trusting
+      // an immediate query (which may return stale pre-transaction data).
+      let decoded: any = null;
+      for (let attempt = 0; attempt < 10; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        const state = await baseProviders.publicDataProvider.queryContractState(contractAddress);
+        decoded = ledger((state as any).data);
+        if (decoded.eligible !== eligibleBefore) break;
+      }
+
+      console.log('=== FINAL DECODED STATE ===', decoded?.eligible, 'was:', eligibleBefore);
+      setResult(decoded?.eligible ?? null);
 
       setIncome('');
     } catch (err) {
