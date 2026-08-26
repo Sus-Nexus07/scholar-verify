@@ -48,24 +48,60 @@ const App: React.FC = () => {
     setError(null);
   };
 
-  return (
-    <div>
-      <header>
+      return (
+    <div className="page">
+      <div className="orb-field">
+        <div className="orb orb-1"></div>
+        <div className="orb orb-2"></div>
+        <div className="orb orb-3"></div>
+      </div>
+
+      <section className="hero">
+        <div className="app-badge">🔒 Zero-Knowledge · Midnight Network</div>
         <h1>ScholarVerify</h1>
-      </header>
-      <main>
+        <p className="hero-subtitle">
+          Prove you qualify for a scholarship without ever revealing your income.
+          Built on Midnight's zero-knowledge infrastructure — your data stays yours,
+          only the answer goes on-chain.
+        </p>
+      </section>
+
+      <div className="app-container">
+        <p className="section-label">How It Works</p>
+        <div className="how-it-works">
+          <div className="step-card">
+            <div className="step-number">1</div>
+            <h3>Connect</h3>
+            <p>Link your Midnight wallet — no personal data required to start.</p>
+          </div>
+          <div className="step-card">
+            <div className="step-number">2</div>
+            <h3>Prove</h3>
+            <p>Enter your income locally. A zero-knowledge proof is generated in your browser.</p>
+          </div>
+          <div className="step-card">
+            <div className="step-number">3</div>
+            <h3>Verify</h3>
+            <p>Only a true/false eligibility result is published on-chain — never your income.</p>
+          </div>
+        </div>
+
         <WalletCard
           isConnected={isConnected}
           walletAddress={walletAddress}
           onConnect={handleConnect}
           onDisconnect={handleDisconnect}
         />
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {error && <p className="error-text">{error}</p>}
         {isConnected && walletAPI && <DeployContract walletAPI={walletAPI} />}
         {isConnected && walletAPI && (
           <CircuitCall walletAPI={walletAPI} contractAddress={CONTRACT_ADDRESS} />
         )}
-      </main>
+
+        <footer className="app-footer">
+          Built on Midnight · Preprod Network
+        </footer>
+      </div>
     </div>
   );
 };

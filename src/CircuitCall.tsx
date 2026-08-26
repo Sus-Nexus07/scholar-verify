@@ -91,27 +91,33 @@ const CircuitCall: React.FC<CircuitCallProps> = ({ walletAPI, contractAddress })
     }
   };
 
-  return (
-    <div>
-      <h2>Check Scholarship Eligibility</h2>
-      <p>Threshold for this program: {threshold.toLocaleString()}</p>
-      <label>
-        Your income (private — never sent or stored on-chain):
+    return (
+    <div className="card">
+      <div className="card-title">
+        <span className="card-icon">🎓</span>
+        Check Scholarship Eligibility
+      </div>
+      <p className="privacy-note">Threshold for this program: {threshold.toLocaleString()}</p>
+      <label>Your income</label>
+      <div className="input-row">
         <input
           type="number"
           value={income}
           onChange={(e) => setIncome(e.target.value)}
           disabled={loading}
+          placeholder="Enter your income"
         />
-      </label>
-      <button onClick={handleProve} disabled={loading || !income}>
-        {loading ? 'Generating proof...' : 'Prove Eligibility'}
-      </button>
-      <p><em>Proved without revealing your input</em></p>
+        <button onClick={handleProve} disabled={loading || !income}>
+          {loading ? 'Generating proof...' : 'Prove Eligibility'}
+        </button>
+      </div>
+      <p className="privacy-note">🔒 Private — never sent or stored on-chain</p>
       {result !== null && (
-        <p>Result: {result ? 'Eligible ✅' : 'Not Eligible ❌'}</p>
+        <div className={`result-box ${result ? 'result-eligible' : 'result-ineligible'}`}>
+          {result ? '✅ Eligible' : '❌ Not Eligible'}
+        </div>
       )}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p className="error-text">{error}</p>}
     </div>
   );
 };

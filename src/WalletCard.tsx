@@ -13,29 +13,27 @@ const WalletCard: React.FC<WalletCardProps> = ({
   onConnect,
   onDisconnect,
 }) => {
-  return (
-    <div>
-      <div>
-        <h2>Connection Status</h2>
-        <div>{isConnected ? 'Connected' : 'Disconnected'}</div>
+    return (
+    <div className="card">
+      <div className="card-title">
+        <span className="card-icon">👛</span>
+        Wallet Connection
       </div>
-      <div>
-        {isConnected && walletAddress ? (
-          <>
-            <p>Wallet Address:</p>
-            <p title={walletAddress}>{walletAddress}</p>
-          </>
-        ) : (
-          <p>Please connect your wallet to proceed.</p>
-        )}
+      <div className="status-row">
+        <span className={`status-badge ${isConnected ? 'status-connected' : 'status-disconnected'}`}>
+          {isConnected ? 'Connected' : 'Disconnected'}
+        </span>
       </div>
-      <div>
-        {isConnected ? (
-          <button onClick={onDisconnect}>Disconnect Wallet</button>
-        ) : (
-          <button onClick={onConnect}>Connect Wallet</button>
-        )}
-      </div>
+      {isConnected && walletAddress ? (
+        <div className="wallet-address" title={walletAddress}>{walletAddress}</div>
+      ) : (
+        <p className="privacy-note">Connect your Midnight wallet to get started.</p>
+      )}
+      {isConnected ? (
+        <button className="secondary" onClick={onDisconnect}>Disconnect Wallet</button>
+      ) : (
+        <button onClick={onConnect}>Connect Wallet</button>
+      )}
     </div>
   );
 };

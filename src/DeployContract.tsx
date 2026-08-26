@@ -72,16 +72,19 @@ const DeployContract: React.FC<DeployContractProps> = ({ walletAPI }) => {
 }
 };
 
-  return (
-    <div style={{ border: '1px solid #444', padding: '1rem', marginTop: '1rem' }}>
-      <h2>Deploy to Preprod</h2>
+    return (
+    <div className="card">
+      <div className="card-title">
+        <span className="card-icon">🚀</span>
+        Deploy to Preprod
+      </div>
       <button onClick={handleDeploy} disabled={loading}>
         {loading ? 'Deploying...' : 'Deploy Contract'}
       </button>
       {deployedAddress && (
-        <p>Deployed at: <code>{deployedAddress}</code></p>
+        <p className="privacy-note">Deployed at: <code>{deployedAddress}</code></p>
       )}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p className="error-text">{error}</p>}
     </div>
   );
 };
