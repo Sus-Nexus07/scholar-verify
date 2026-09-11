@@ -1,19 +1,8 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vitest/config';
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
-  optimizeDeps: {
-    exclude: [
-      '@midnight-ntwrk/ledger-v8',
-      '@midnight-ntwrk/onchain-runtime-v3',
-      '@midnight-ntwrk/zkir-v2',
-    ],
+  test: {
+    testTimeout: 120_000,
+    hookTimeout: 120_000,
   },
-  server: {
-    watch: {
-      ignored: ['**/midnight-level-db/**', '**/logs/**'],
-    },
-  },
-})
+});
